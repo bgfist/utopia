@@ -1,0 +1,165 @@
+
+'use strict';
+
+
+
+
+
+var React = require('react-native');
+var {
+  AppRegistry,
+  StyleSheet,
+  Text,
+  View,
+  ToolbarAndroid,
+  BackAndroid,
+  DrawerLayoutAndroid,
+  Dimensions,
+  Navigator
+} = React;
+
+var globalVariable =require('./globalVariable');
+
+var _navigator;
+BackAndroid.addEventListener('hardwareBackPress', () => {
+  if (_navigator && _navigator.getCurrentRoutes().length > 1) {
+    global.drawer.closeDrawer();
+    _navigator.pop();
+    return true;
+  }
+  return false;
+});
+
+
+
+
+
+
+
+var Home =require('./Views/Home');
+var Battle =require('./Views/Battle');
+var Link =require('./Views/Link');
+var Activate =require('./Views/Activate');
+var Search =require('./Views/Search');
+var Things  =require('./Views/Things');
+var Shuijingdianchi =require('./Views/Shuijingdianchi');
+
+
+var ToolsBar =require('./Components/ToolsBar');
+
+var RouteMapper = function(route, navigationOperations, onComponentRef) {
+  global.navigator= _navigator = navigationOperations;
+  var  Component;
+  var period =-1;
+  switch(route.index){
+  	case 0:
+  	    Component = Home;
+        period =5;
+  	    break;
+  	case 2:
+         period=2;
+  	     Component = Battle;
+  	     break;
+
+  	case  4:
+         period=4;
+  	     Component = Link;
+  	     break;
+  	case   1:
+         period=1;
+  	     Component =Search;
+  	     break;
+  	case  3:
+          period=3;
+  	      Component = Activate;
+
+         break;
+    case   5:
+          Component = Things;
+         break;
+    case   6:
+          Component = Shuijingdianchi;
+          break;
+  	default:
+  	      Component =Home;
+  	      break;
+  }
+
+
+  
+
+  // Component = Home;
+  // var things=[];
+
+  return (
+       <View  style={styles.container}>
+          <ToolbarAndroid
+              navIcon ={require('./Images/uie_thumb_big.png')}
+              onIconClicked={() =>global.drawer.openDrawer() }
+              style={styles.toolbar}		      
+		      title={route.title}		      
+		      />
+          <ToolsBar ref={(toolsbar)=>global.toolsbar=toolsbar} period={period}/>
+          <Component navigator={_navigator} passProps={route.passProps} />
+       </View>
+
+
+  	);
+  
+};
+
+
+
+
+var  GlobalInfo = require('./GlobalInfo');
+
+var MyApp = React.createClass({
+
+	render: function() {
+    return (
+      <DrawerLayoutAndroid
+        drawerPosition={DrawerLayoutAndroid.positions.Left}
+        drawerWidth={Dimensions.get('window').width -100}
+        keyboardDismissMode="on-drag"
+        ref={(drawer) => { global.drawer = drawer; }}
+        renderNavigationView={this._renderNavigationView}>
+        {this._renderNavigation()}
+      </DrawerLayoutAndroid>
+      );
+  },
+
+  _renderNavigationView: function() {
+    return (
+      <GlobalInfo/>
+    );
+  },
+
+  _renderNavigation: function() {
+    var initialRoute = {index: 0,title:'开始'};
+    return (
+      <Navigator
+        style={styles.container}
+        initialRoute={initialRoute}
+        configureScene={() => Navigator.SceneConfigs.FloatFromRight}
+        renderScene={RouteMapper}
+      />
+    );
+  }
+
+});
+
+
+var styles =StyleSheet.create({
+	container:{
+		flex: 1,
+		backgroundColor: 'lightgray',
+	},
+	toolbar: {
+           backgroundColor: '#ffffff',
+           height: 56,
+    },
+});
+
+
+AppRegistry.registerComponent('hello', () => MyApp);
+
